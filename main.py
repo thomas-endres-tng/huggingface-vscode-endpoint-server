@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from generators import GeneratorBase, StarCoder
+from generators import GeneratorBase, StarCoder2
 import json
 
 from util import logger, get_parser
@@ -10,8 +10,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware
 )
-generator: GeneratorBase = ...
-
+generator: GeneratorBase = None
 
 @app.post("/api/generate/")
 async def api(request: Request):
@@ -30,7 +29,7 @@ async def api(request: Request):
 def main():
     global generator
     args = get_parser().parse_args()
-    generator = StarCoder(args.pretrained, device_map='auto')
+    generator = StarCoder2()
     uvicorn.run(app, host=args.host, port=args.port)
 
 

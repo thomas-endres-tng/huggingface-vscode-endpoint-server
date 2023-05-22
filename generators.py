@@ -11,6 +11,23 @@ class GeneratorBase:
         return self.generate(query, parameters)
 
 
+class StarCoder2(GeneratorBase):
+    def __init__(self):
+        self.model = AutoModelForCausalLM.from_pretrained("bigcode/starcoder", load_in_8bit=True, device_map="auto")
+        self.tokenizer = AutoTokenizer.from_pretrained('bigcode/starcoder')
+
+    def generate(self, query: str, parameters: dict) -> str:
+        input_ids: torch.Tensor = self.tokenizer.encode(query, return_tensors='pt')
+        config: GenerationConfig = GenerationConfig.from_dict({
+            **self.generation_config.to_dict(),
+            **parameters
+        })
+        output_ids: torch.Tensor = self.model.generate(input_ids, generation_config=config)
+        output_text: str = self.tokenizer.decode(
+            output_ids[0], skip_special_tokens=True, clean_up_tokenization_spaces=False)
+        return output_text
+
+
 class StarCoder(GeneratorBase):
     def __init__(self, pretrained: str, device: str = None, device_map: str = None):
         self.pretrained: str = pretrained
